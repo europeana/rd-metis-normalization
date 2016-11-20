@@ -60,6 +60,7 @@
       <dc:format xml:lang="en">1 letter 21.5 x 33.5</dc:format>
       <dc:format>image/jpeg</dc:format>
       <dc:identifier>OB_1000000_SC</dc:identifier>
+      <dc:identifier>OB_1000000_SC</dc:identifier>
       <dc:identifier>EADseries:IVRLA10-I:1</dc:identifier>
       <dc:identifier>ivrla:3827</dc:identifier>
       <dc:identifier>http://digital.ucd.ie/view/ivrla:3827</dc:identifier>
@@ -76,6 +77,9 @@
       <dc:subject xml:lang="en">Newman, John Henry, 1801-1890--Correspondence</dc:subject>
       <dc:subject xml:lang="en">Whately, Richard, 1787-1863--Correspondence</dc:subject>
       <dc:subject xml:lang="en">Logic</dc:subject>
+      <dc:subject xml:lang="en">Logic </dc:subject>
+      <dc:subject xml:lang="pt">Logic</dc:subject>
+      <dc:subject>  Logic </dc:subject>
       <dc:subject xml:lang="en">Newspapers--Sections, columns, etc--Reviews</dc:subject>
       <dc:subject xml:lang="en">Correspondence</dc:subject>
       <dc:title xml:lang="en">[Letter from John Henry Newman (Oriel College) to Dr. Richard Whately, commenting on and enclosing notes on a review on 'Dr. Whateley's Logic', in the Edinburgh Review of April 1833 .]</dc:title>

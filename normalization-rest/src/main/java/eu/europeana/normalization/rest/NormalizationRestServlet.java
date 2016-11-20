@@ -15,6 +15,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import eu.europeana.normalization.NormalizationService;
+import eu.europeana.normalization.cleaning.DuplicateStatementCleaning;
 import eu.europeana.normalization.cleaning.TrimAndEmptyValueCleaning;
 import eu.europeana.normalization.language.LanguageNormalizer;
 import eu.europeana.normalization.language.TargetLanguagesVocabulary;
@@ -33,8 +34,9 @@ public class NormalizationRestServlet extends HttpServlet {
 		LanguageNormalizer languageNorm = new LanguageNormalizer(TargetLanguagesVocabulary.valueOf(targetVocabString));
 
 		TrimAndEmptyValueCleaning spacesCleaner=new TrimAndEmptyValueCleaning();
+		DuplicateStatementCleaning dupStatementsCleaner=new DuplicateStatementCleaning();
 		
-		ChainedNormalization chainedNormalizer = new ChainedNormalization(spacesCleaner.toEdmRecordNormalizer(), languageNorm.toEdmRecordNormalizer());
+		ChainedNormalization chainedNormalizer = new ChainedNormalization(spacesCleaner.toEdmRecordNormalizer(), dupStatementsCleaner, languageNorm.toEdmRecordNormalizer());
 
 		service = new NormalizationService(chainedNormalizer);
 	}
@@ -46,7 +48,7 @@ public class NormalizationRestServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		processNormalize(request, response);
+		respondWithError(400, "HTTP method not supported: GET", request, response);
 	}
 
 	private void processNormalize(HttpServletRequest request, HttpServletResponse response) {

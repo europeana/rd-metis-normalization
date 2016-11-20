@@ -12,4 +12,5 @@ import java.util.HashMap;
 	public static final String ORE="http://www.openarchives.org/ore/terms/";
 	public static final String SKOS="http://www.w3.org/2004/02/skos/core#";
 	public static final String DC="http://purl.org/dc/elements/1.1/";
+	public static final String DCTERMS = "http://purl.org/dc/terms/";
 }

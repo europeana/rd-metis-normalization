@@ -83,7 +83,7 @@ public class LanguageNormalizer implements ValueNormalization {
 					put("dc", "http://purl.org/dc/elements/1.1/");
 					put("ore", "http://www.openarchives.org/ore/terms/");
 				}}, "//ore:Proxy/dc:language");
-    	ValueToRecordNormalizationWrapper dcLanguageNorm=new ValueToRecordNormalizationWrapper(this, dcLanguageQuery);
+    	ValueToRecordNormalizationWrapper dcLanguageNorm=new ValueToRecordNormalizationWrapper(this, false, dcLanguageQuery);
     	return dcLanguageNorm;
 	}
 

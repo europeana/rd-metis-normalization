@@ -55,24 +55,25 @@ public class ValueToRecordNormalizationWrapper implements RecordNormalization {
 		}
 	}
 
-	XpathQuery EUROPEANA_PROXY_QUERY=new XpathQuery(
+	protected static final XpathQuery EUROPEANA_PROXY_QUERY=new XpathQuery(
 			new HashMap<String, String>() {{
-				put("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-				put("ore", "http://www.openarchives.org/ore/terms/");
-				put("edm", "http://www.europeana.eu/schemas/edm/");
+				put("rdf",Namespaces.RDF);
+				put("ore", Namespaces.ORE);
+				put("edm", Namespaces.EDM);
 			}}, "/rdf:RDF/ore:Proxy[edm:europeanaProxy='true']");
 	
-	XpathQuery PROVIDER_PROXY_QUERY=new XpathQuery(
+	protected static final XpathQuery PROVIDER_PROXY_QUERY=new XpathQuery(
 			new HashMap<String, String>() {{
-				put("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-				put("ore", "http://www.openarchives.org/ore/terms/");
-				put("edm", "http://www.europeana.eu/schemas/edm/");
+				put("rdf",Namespaces.RDF);
+				put("ore", Namespaces.ORE);
+				put("edm", Namespaces.EDM);
 			}}, "/rdf:RDF/ore:Proxy[not(edm:europeanaProxy='true')]");
 	
 	List<XpathQuery> targetElements;
 	ValueNormalization normalization;
+	boolean normalizeToEuropeanaProxy;
 	
-	public ValueToRecordNormalizationWrapper(ValueNormalization normalization, XpathQuery... targetElements) {
+	public ValueToRecordNormalizationWrapper(ValueNormalization normalization, boolean normalizeToEuropeanaProxy, XpathQuery... targetElements) {
 		this.normalization = normalization;
 		this.targetElements=new ArrayList<>();
 		for(XpathQuery q: targetElements) {
@@ -99,14 +100,10 @@ public class ValueToRecordNormalizationWrapper implements RecordNormalization {
 			for(int i=0; i<elements.getLength(); i++) {
 				Element el=(Element) elements.item(i);
 				String value = XmlUtil.getElementText(el);
-				System.out.println(el.getNodeName());
-				System.out.println(value);
-				System.out.println(el.getAttributeNS(Namespaces.RDF, "resource"));
-				System.out.println(el.getAttributeNS(Namespaces.XML, "lang"));
 				List<String> normalizedValue = normalization.normalize(value);
 		       
 				if(normalizedValue.isEmpty()) {
-					if(el.getAttributes().getLength()==0 || (el.getAttributes().getLength()==1 && el.getAttributeNS(Namespaces.XML, "lang")!=null))
+					if(el.getAttributes().getLength()==0 || (el.getAttributes().getLength()==1 && !StringUtils.isEmpty(el.getAttributeNS(Namespaces.XML, "lang"))) )
 						el.getParentNode().removeChild(el);
 					else {
 						NodeList childNodes = el.getChildNodes();
@@ -117,7 +114,7 @@ public class ValueToRecordNormalizationWrapper implements RecordNormalization {
 				        }
 					}
 				} else {
-					if(el.getParentNode()==providerProxy) {
+					if(normalizeToEuropeanaProxy && el.getParentNode()==providerProxy) {
 						if(europeanaProxy==null) {
 							europeanaProxy=edm.createElementNS(Namespaces.ORE, "Proxy");
 							edm.getDocumentElement().appendChild(europeanaProxy);

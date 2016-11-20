@@ -64,7 +64,8 @@ public class TrimAndEmptyValueCleaning implements ValueNormalization {
 					put("edm", Namespaces.EDM);
 					put("skos", Namespaces.SKOS);
 				}}, 
-				"/rdf:RDF/ore:Proxy[edm:europeanaProxy='true']/*"
+				"/rdf:RDF/ore:Proxy/*"
+//				"/rdf:RDF/ore:Proxy[edm:europeanaProxy='true']/*"
 				+ "| /rdf:RDF/ore:Aggregation/*"
 				+ "| /rdf:RDF/edm:WebResource/*"
 				+ "| /rdf:RDF/edm:Agent/*"
@@ -82,7 +83,7 @@ public class TrimAndEmptyValueCleaning implements ValueNormalization {
 		
 		
 		
-    	ValueToRecordNormalizationWrapper dcLanguageNorm=new ValueToRecordNormalizationWrapper(this, cleanablePropertiesQuery);
+    	ValueToRecordNormalizationWrapper dcLanguageNorm=new ValueToRecordNormalizationWrapper(this, false, cleanablePropertiesQuery);
     	return dcLanguageNorm;
 	}
 
