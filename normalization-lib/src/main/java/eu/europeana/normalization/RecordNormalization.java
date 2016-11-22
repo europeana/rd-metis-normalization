@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.w3c.dom.Document;
 
+import eu.europeana.normalization.model.NormalizationReport;
+
 
 public interface RecordNormalization {
 
-	public void normalize(Document edm);
+	public NormalizationReport normalize(Document edm);
 	
 }

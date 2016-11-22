@@ -12,6 +12,7 @@ import java.util.Set;
 import org.w3c.dom.Document;
 
 import eu.europeana.normalization.util.nlp.IndexUtilUnicode;
+import eu.europeana.normalization.model.NormalizationReport;
 import eu.europeana.normalization.util.MapOfLists;
 
 /**
@@ -35,8 +36,8 @@ public class NormalizationService {
         this.normalizer = normalizer;
     }
 
-	public void normalize(Document edm) {
-		normalizer.normalize(edm);
+	public NormalizationReport normalize(Document edm) {
+		return normalizer.normalize(edm);
 	}
 
 

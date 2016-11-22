@@ -1,4 +1,4 @@
-package eu.europeana.normalization.language.client;
+package eu.europeana.normalization.client;
 
 import java.io.File;
 import java.io.FileInputStream;

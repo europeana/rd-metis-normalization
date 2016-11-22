@@ -1,9 +1,9 @@
-package eu.europeana.normalization.language.client;
+package eu.europeana.normalization.client;
 
 
 import java.io.File;
 
-import eu.europeana.normalization.language.client.NormalizationLanguageClient;
+import eu.europeana.normalization.client.NormalizationClient;
 
 /**
  * Command line test for the NormalizationLanguageClient
@@ -15,7 +15,7 @@ public class TestNormalizationClient {
 
     public static void main(String[] args) {
     	try {
-            NormalizationLanguageClient client = new NormalizationLanguageClient();
+            NormalizationClient client = new NormalizationClient();
             
             String normalizedEdm = client.normalize(new File("src/test/samples/edm-record.xml"));
                 System.out.println(normalizedEdm);

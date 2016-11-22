@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import eu.europeana.normalization.model.ConfidenceLevel;
+
 
 /**
  * Detailed informatio about the normalized value, such as the confidence that the normalization is correct
@@ -35,9 +37,13 @@ public class NormalizeDetails {
     public void setNormalizedValue(String normalizedValue) {
         this.normalizedValue = normalizedValue;
     }
-
+    
     public float getConfidence() {
-        return confidence;
+    	return confidence;
+    }
+
+    public ConfidenceLevel getConfidenceClass() {
+        return ConfidenceLevel.fromScore(confidence);
     }
 
     public void setConfidence(float confidence) {

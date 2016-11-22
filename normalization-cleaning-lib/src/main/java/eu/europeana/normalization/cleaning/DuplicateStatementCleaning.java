@@ -14,6 +14,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import eu.europeana.normalization.RecordNormalization;
+import eu.europeana.normalization.model.ConfidenceLevel;
+import eu.europeana.normalization.model.NormalizationReport;
 import eu.europeana.normalization.normalizers.ValueToRecordNormalizationWrapper.XpathQuery;
 import eu.europeana.normalization.util.Namespaces;
 import eu.europeana.normalization.util.XPathUtil;
@@ -61,8 +63,8 @@ public class DuplicateStatementCleaning implements RecordNormalization {
 	XpathQuery[][] fieldSetsToValidate=new XpathQuery[][]{{PROXY_QUERY_TITLE, PROXY_QUERY_ALTERNATIVE},{PROXY_QUERY_SUBJECT},{PROXY_QUERY_IDENTIFIER},{PROXY_QUERY_TYPE}};
 	
 	@Override
-	public void normalize(Document edm) {
-		
+	public NormalizationReport normalize(Document edm) {
+		NormalizationReport report=new NormalizationReport();
 		for(XpathQuery[] fieldSet: fieldSetsToValidate) {
 			ArrayList<Element> elements=new ArrayList<>();
 			for(XpathQuery query: fieldSet) {
@@ -92,6 +94,7 @@ public class DuplicateStatementCleaning implements RecordNormalization {
 					
 					if(dupLang) {
 						el.getParentNode().removeChild(el);
+						report.increment(this.getClass().getSimpleName(), ConfidenceLevel.CERTAIN);
 					} else {
 						dupDetectorWithLang.add(keyLang);
 		//				dupDetector.add(key);
@@ -99,6 +102,7 @@ public class DuplicateStatementCleaning implements RecordNormalization {
 				}
 			}
 		}		
+		return report;
 	}
 
 }

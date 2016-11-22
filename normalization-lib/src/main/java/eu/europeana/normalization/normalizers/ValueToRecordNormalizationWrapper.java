@@ -13,8 +13,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import eu.europeana.normalization.NormalizeDetails;
 import eu.europeana.normalization.RecordNormalization;
 import eu.europeana.normalization.ValueNormalization;
+import eu.europeana.normalization.model.ConfidenceLevel;
+import eu.europeana.normalization.model.NormalizationReport;
 import eu.europeana.normalization.util.Namespaces;
 import eu.europeana.normalization.util.XPathUtil;
 import eu.europeana.normalization.util.XmlUtil;
@@ -82,7 +85,7 @@ public class ValueToRecordNormalizationWrapper implements RecordNormalization {
 	}
 	
 	@Override
-	public void normalize(Document edm) {
+	public NormalizationReport normalize(Document edm) {
 		Element europeanaProxy;
 		Element providerProxy;
 		try {
@@ -91,6 +94,7 @@ public class ValueToRecordNormalizationWrapper implements RecordNormalization {
 		} catch (XPathExpressionException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
+		NormalizationReport report=new NormalizationReport();
 		
 		for(XpathQuery q: targetElements) { 
 			NodeList elements;
@@ -100,7 +104,7 @@ public class ValueToRecordNormalizationWrapper implements RecordNormalization {
 			for(int i=0; i<elements.getLength(); i++) {
 				Element el=(Element) elements.item(i);
 				String value = XmlUtil.getElementText(el);
-				List<String> normalizedValue = normalization.normalize(value);
+				List<NormalizeDetails> normalizedValue = normalization.normalizeDetailed(value);
 		       
 				if(normalizedValue.isEmpty()) {
 					if(el.getAttributes().getLength()==0 || (el.getAttributes().getLength()==1 && !StringUtils.isEmpty(el.getAttributeNS(Namespaces.XML, "lang"))) )
@@ -113,39 +117,53 @@ public class ValueToRecordNormalizationWrapper implements RecordNormalization {
 				        	  el.removeChild(node);
 				        }
 					}
+					report.increment(normalization.getClass().getSimpleName(), ConfidenceLevel.CERTAIN);
 				} else {
-					if(normalizeToEuropeanaProxy && el.getParentNode()==providerProxy) {
-						if(europeanaProxy==null) {
-							europeanaProxy=edm.createElementNS(Namespaces.ORE, "Proxy");
-							edm.getDocumentElement().appendChild(europeanaProxy);
-							Element europeanaProxyProp=edm.createElementNS(Namespaces.EDM, "europeanaProxy");
-							europeanaProxyProp.appendChild(edm.createTextNode("true"));
-							europeanaProxy.appendChild(europeanaProxyProp);
-						}
-			        	for(int k=0 ; k<normalizedValue.size() ; k++) {
-			        		Node newEl = el.cloneNode(false);
-			        		newEl.appendChild(el.getOwnerDocument().createTextNode(normalizedValue.get(k)));
-			        		europeanaProxy.appendChild(newEl);
-			        	}
-					} else {
-						NodeList childNodes = el.getChildNodes();
-				        for (int j = 0; j < childNodes.getLength(); j++) {
-				          Node node = childNodes.item(j);
-				          if (node.getNodeType() == Node.TEXT_NODE) 
-				        	  el.removeChild(node);
-				        }
-				        el.appendChild(el.getOwnerDocument().createTextNode(normalizedValue.get(0)));
-				        if(normalizedValue.size()>1) {
-				        	for(int k=1 ; k<normalizedValue.size() ; k++) {
+//					System.out.println(value);
+//					System.out.println(normalizedValue.get(0).getNormalizedValue());
+					
+					boolean valueChanged=normalizedValue.size()>1 || !normalizedValue.get(0).getNormalizedValue().equals(value);
+//					System.out.println(valueChanged);
+					if (valueChanged) {
+						if(normalizeToEuropeanaProxy && el.getParentNode()==providerProxy) {
+							if(europeanaProxy==null) {
+								europeanaProxy=edm.createElementNS(Namespaces.ORE, "Proxy");
+								edm.getDocumentElement().appendChild(europeanaProxy);
+								Element europeanaProxyProp=edm.createElementNS(Namespaces.EDM, "europeanaProxy");
+								europeanaProxyProp.appendChild(edm.createTextNode("true"));
+								europeanaProxy.appendChild(europeanaProxyProp);
+							}
+				        	for(int k=0 ; k<normalizedValue.size() ; k++) {
+				        		report.increment(normalization.getClass().getSimpleName(), normalizedValue.get(k).getConfidenceClass());
+				        		
 				        		Node newEl = el.cloneNode(false);
-				        		newEl.appendChild(el.getOwnerDocument().createTextNode(normalizedValue.get(k)));
-				        		el.getParentNode().insertBefore(newEl, el.getNextSibling());
+				        		newEl.appendChild(el.getOwnerDocument().createTextNode(normalizedValue.get(k).getNormalizedValue()));
+				        		europeanaProxy.appendChild(newEl);
 				        	}
-				        }
+						} else {
+							NodeList childNodes = el.getChildNodes();
+					        for (int j = 0; j < childNodes.getLength(); j++) {
+					          Node node = childNodes.item(j);
+					          if (node.getNodeType() == Node.TEXT_NODE) 
+					        	  el.removeChild(node);
+					        }
+					        el.appendChild(el.getOwnerDocument().createTextNode(normalizedValue.get(0).getNormalizedValue()));
+					        report.increment(normalization.getClass().getSimpleName(), normalizedValue.get(0).getConfidenceClass());
+					        
+					        if(normalizedValue.size()>1) {
+					        	for(int k=1 ; k<normalizedValue.size() ; k++) {
+					        		Node newEl = el.cloneNode(false);
+					        		report.increment(normalization.getClass().getSimpleName(), normalizedValue.get(k).getConfidenceClass());
+					        		newEl.appendChild(el.getOwnerDocument().createTextNode(normalizedValue.get(k).getNormalizedValue()));
+					        		el.getParentNode().insertBefore(newEl, el.getNextSibling());
+					        	}
+					        }
+						}
 					}
 				}
 			}
 		}
+		return report;
 	}
 
 }

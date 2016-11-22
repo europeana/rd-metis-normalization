@@ -6,6 +6,7 @@ import java.util.List;
 import org.w3c.dom.Document;
 
 import eu.europeana.normalization.RecordNormalization;
+import eu.europeana.normalization.model.NormalizationReport;
 
 public class ChainedNormalization implements RecordNormalization {
 
@@ -33,10 +34,12 @@ public class ChainedNormalization implements RecordNormalization {
 	}
 	
 	@Override
-	public void normalize(Document edm) {
+	public NormalizationReport normalize(Document edm) {
+		NormalizationReport report=new NormalizationReport();
 		for(RecordNormalization normOp: normalizations) {
-			normOp.normalize(edm);
+			report.mergeWith(normOp.normalize(edm));
 		}
+		return report;
 	}
 
 

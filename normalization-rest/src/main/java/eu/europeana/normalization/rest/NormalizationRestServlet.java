@@ -60,7 +60,7 @@ public class NormalizationRestServlet extends HttpServlet {
 			}
 			Document recordDom = null;
 			try {
-				recordDom = XmlUtil.parseDom(new StringReader(record));
+				recordDom = XmlUtil.parseDom(new StringReader(record)); 
 			} catch (Exception e) {
 				respondWithError(400, "Error parsing XML in parameter 'record': " + e.getMessage(), request, response);
 				return;
