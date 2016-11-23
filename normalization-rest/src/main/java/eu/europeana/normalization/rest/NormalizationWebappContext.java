@@ -31,20 +31,20 @@ public class NormalizationWebappContext  implements ServletContextListener {
 		event.getServletContext().setAttribute("NormalizationService", service);
 		
 		try {
-			initSwagger();
+			initSwagger(event.getServletContext().getContextPath());
 		} catch (ServletException e) {
 			log.warn(e.getMessage(), e);
 		}
 		
     }
 
-    private void initSwagger() throws ServletException {
+    private void initSwagger(String contextPath) throws ServletException {
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setTitle("EDM Record Normalization plugin for Metis");
-        beanConfig.setDescription("Applies a preset list of data cleaning and normalization operations, metadata records in EDM.");
+        beanConfig.setDescription("Applies a preset list of data cleaning and normalization operations to metadata records in EDM.");
         beanConfig.setVersion("0.1");
         beanConfig.setContact("Nuno Freire <nfreire@gmail.com>");
-        beanConfig.setBasePath("rest");
+        beanConfig.setBasePath(contextPath+"/rest");
         beanConfig.setResourcePackage(NormalizationResource.class.getPackage().getName());
         beanConfig.setScan(true);
     }

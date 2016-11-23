@@ -2,6 +2,11 @@ package eu.europeana.normalization.client;
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.IOUtils;
 
 import eu.europeana.normalization.client.NormalizationClient;
 import eu.europeana.normalization.model.NormalizedBatchResult;
@@ -18,13 +23,22 @@ public class TestNormalizationClient {
     	try {
             NormalizationClient client = new NormalizationClient();
             
-            NormalizedBatchResult normalizedEdm = client.normalize(new File("src/test/samples/edm-record.xml"));
-                System.out.println(normalizedEdm);
-                System.out.println("#############################################");
-                 normalizedEdm = client.normalize(new File("src/test/samples/edm-record-internal.xml"));
+            List<String> recs=new ArrayList<>();
+            
+            FileInputStream in = new FileInputStream(new File("src/test/samples/edm-record.xml"));
+    		recs.add(IOUtils.toString(in, "UTF-8"));
+    		in.close();
+
+    		in = new FileInputStream(new File("src/test/samples/edm-record-internal.xml"));
+    		recs.add(IOUtils.toString(in, "UTF-8"));
+    		in.close();
+            
+            
+            NormalizedBatchResult normalizedEdm = client.normalize(recs);
                 System.out.println(normalizedEdm);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    
 }
