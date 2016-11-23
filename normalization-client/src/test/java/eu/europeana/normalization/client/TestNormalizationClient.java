@@ -19,7 +19,7 @@ public class TestNormalizationClient {
             
             String normalizedEdm = client.normalize(new File("src/test/samples/edm-record.xml"));
                 System.out.println(normalizedEdm);
-                System.out.println("#############################################333");
+                System.out.println("#############################################");
                  normalizedEdm = client.normalize(new File("src/test/samples/edm-record-internal.xml"));
                 System.out.println(normalizedEdm);
         } catch (Exception e) {

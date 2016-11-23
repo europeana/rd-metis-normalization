@@ -40,8 +40,8 @@ public class NormalizationWebappContext  implements ServletContextListener {
 
     private void initSwagger() throws ServletException {
         BeanConfig beanConfig = new BeanConfig();
-        beanConfig.setTitle("Metis Normalization Plugin");
-        beanConfig.setDescription("The .");
+        beanConfig.setTitle("EDM Record Normalization plugin for Metis");
+        beanConfig.setDescription("Applies a preset list of data cleaning and normalization operations, metadata records in EDM.");
         beanConfig.setVersion("0.1");
         beanConfig.setContact("Nuno Freire <nfreire@gmail.com>");
         beanConfig.setBasePath("rest");

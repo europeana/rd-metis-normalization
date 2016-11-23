@@ -43,11 +43,11 @@ public class NormalizationResource {
 	  @Consumes(MediaType.APPLICATION_JSON)
 	  @Produces(MediaType.APPLICATION_JSON +"; charset=UTF-8")
 	  @Path("normalizeEdmInternal")
-	  @ApiOperation(value = ".",
-	    notes = "Tt.",
+	  @ApiOperation(value = "Normalize records in EDM Internal",
+	    notes = "Applies a preset list of data cleaning and normalization operations, to the submited records.",
 	    response = NormalizedRecordResult.class,
 	    responseContainer = "List")
-	  public List<NormalizedRecordResult> normalizeEdmInternal(@ApiParam(value="EDM Record, or list of records, in XML", required=true)List<String> records) throws Exception {
+	  public List<NormalizedRecordResult> normalizeEdmInternal(@ApiParam(value="List of EDM records in Strings containing XML", required=true)List<String> records) throws Exception {
 		  try {
 			  List<NormalizedRecordResult> result=new ArrayList<>();
 				for(String edmRec: records) {
