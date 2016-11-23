@@ -17,7 +17,8 @@ public class NormalizationOperationReport {
 		super();
 		this.operation = operation;
 	}
-
+	public NormalizationOperationReport() {
+	}
 
 	public void mergeWith(NormalizationOperationReport other) {
 		Set<Entry<ConfidenceLevel, Integer>> entries = other.getCounts().entrySet();

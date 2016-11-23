@@ -19,6 +19,7 @@ import org.w3c.dom.Document;
 
 import eu.europeana.normalization.NormalizationService;
 import eu.europeana.normalization.model.NormalizationReport;
+import eu.europeana.normalization.model.NormalizedBatchResult;
 import eu.europeana.normalization.model.NormalizedRecordResult;
 import eu.europeana.normalization.util.XmlUtil;
 import io.swagger.annotations.Api;
@@ -45,9 +46,8 @@ public class NormalizationResource {
 	  @Path("normalizeEdmInternal")
 	  @ApiOperation(value = "Normalize records in EDM Internal",
 	    notes = "Applies a preset list of data cleaning and normalization operations, to the submited records.",
-	    response = NormalizedRecordResult.class,
-	    responseContainer = "List")
-	  public List<NormalizedRecordResult> normalizeEdmInternal(@ApiParam(value="List of EDM records in Strings containing XML", required=true)List<String> records) throws Exception {
+	    response = NormalizedBatchResult.class)
+	  public NormalizedBatchResult normalizeEdmInternal(@ApiParam(value="List of EDM records in Strings containing XML", required=true)List<String> records) throws Exception {
 		  try {
 			  List<NormalizedRecordResult> result=new ArrayList<>();
 				for(String edmRec: records) {
@@ -55,10 +55,10 @@ public class NormalizationResource {
 						result.add(processNormalize(edmRec));
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);
-						result.add(new NormalizedRecordResult(e.getMessage()));
+						result.add(new NormalizedRecordResult(e.getMessage(), edmRec));
 					}
 				}
-				return result;
+				return new NormalizedBatchResult(result);
 		  } catch (Exception e) {
 			  log.error(e.getMessage(), e);
 			  throw new InternalServerErrorException(e);
@@ -67,12 +67,12 @@ public class NormalizationResource {
 		private NormalizedRecordResult processNormalize(String record) {
 			try {
 				if (record == null) 
-					return new NormalizedRecordResult("Missing required parameter 'record'");
+					return new NormalizedRecordResult("Missing required parameter 'record'", record);
 				Document recordDom = null;
 				try {
 					recordDom = XmlUtil.parseDom(new StringReader(record)); 
 				} catch (Exception e) {
-					return new NormalizedRecordResult("Error parsing XML in parameter 'record': " + e.getMessage());
+					return new NormalizedRecordResult("Error parsing XML in parameter 'record': " + e.getMessage(), record);
 				}
 				NormalizationReport report = ((NormalizationService)servletContext.getAttribute("NormalizationService")).normalize(recordDom);
 				String writeDomToString = XmlUtil.writeDomToString(recordDom);
@@ -80,7 +80,7 @@ public class NormalizationResource {
 				return result;
 			} catch (Throwable e) {
 				log.info(e.getMessage(), e);
-				return new NormalizedRecordResult("Unexpected error: " + e.getMessage());
+				return new NormalizedRecordResult("Unexpected error: " + e.getMessage(), record );
 			}
 		}
 

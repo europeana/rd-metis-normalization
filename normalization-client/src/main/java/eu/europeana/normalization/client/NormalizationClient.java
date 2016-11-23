@@ -16,6 +16,8 @@ import org.apache.commons.io.IOUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.europeana.normalization.model.NormalizedBatchResult;
+
 /**
  * A Client to the REST API of the language normalization service
  * 
@@ -26,7 +28,7 @@ public class NormalizationClient {
     private Client client = ClientBuilder.newBuilder().build();
     private Config config = new Config();
  
-    public String normalize(String edmXmlRecord) throws Exception {
+    public NormalizedBatchResult normalize(String edmXmlRecord) throws Exception {
         WebTarget target = client.target(config.getNormalizationServiceUrl()).path(
                 "normalization/normalizeEdmInternal");
 
@@ -34,10 +36,10 @@ public class NormalizationClient {
         recs.add(edmXmlRecord);
         ObjectMapper m=new ObjectMapper();
         
-        
-        Form form = new Form();
         String json = m.writeValueAsString(recs);
-		form.param("record", json);
+        
+//        Form form = new Form();
+//		form.param("record", json);
 //        target., form)
 //        String requestResult =
 //        target.request(MediaType.APPLICATION_XML)
@@ -47,8 +49,11 @@ public class NormalizationClient {
 //		Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(form,MediaType.APPLICATION_FORM_URLENCODED_TYPE));
         Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(json,MediaType.APPLICATION_JSON));
         if (response.getStatus() == 200) {
-            String normalizedEdmXmlRecord = response.readEntity(String.class);
-            return normalizedEdmXmlRecord;
+        	String normalizedEdmXmlRecord = response.readEntity(String.class);
+        	
+        	NormalizedBatchResult report = m.readValue(normalizedEdmXmlRecord, NormalizedBatchResult.class);
+        	
+            return report;
         } else
             throw handleInvalidResponse(target, "POST", json, response);
     }
@@ -60,7 +65,7 @@ public class NormalizationClient {
                                     response.getStatus() + "\n" + response.readEntity(String.class));
     }
 
-	public String normalize(File edmXmlRecord) throws Exception {
+	public NormalizedBatchResult normalize(File edmXmlRecord) throws Exception {
 		FileInputStream in = new FileInputStream(edmXmlRecord);
 		String edmRecStr=IOUtils.toString(in, "UTF-8");
 		in.close();

@@ -7,8 +7,9 @@ public class NormalizedRecordResult {
 	String normalizedRecordInEdmXml;
 	String errorMessage=null;
 	
-	public NormalizedRecordResult(String errorMessage) {
+	public NormalizedRecordResult(String errorMessage, String edmRec) {
 		this.errorMessage=errorMessage;
+		this.normalizedRecordInEdmXml=edmRec;
 	}
 	
 	public NormalizedRecordResult(String normalizedRecordInEdmXml, NormalizationReport report) {
