@@ -8,7 +8,7 @@ import eu.europeana.normalization.NormalizationService;
 import eu.europeana.normalization.cleaning.DuplicateStatementCleaning;
 import eu.europeana.normalization.cleaning.TrimAndEmptyValueCleaning;
 import eu.europeana.normalization.language.LanguageNormalizer;
-import eu.europeana.normalization.language.TargetLanguagesVocabulary;
+import eu.europeana.normalization.language.LanguagesVocabulary;
 import eu.europeana.normalization.normalizers.ChainedNormalization;
 import io.swagger.jaxrs.config.BeanConfig;
 
@@ -19,7 +19,8 @@ public class NormalizationWebappContext  implements ServletContextListener {
     	NormalizationService service;
 
 		String targetVocabString = event.getServletContext().getInitParameter("normalization.language.target.vocabulary");
-		LanguageNormalizer languageNorm = new LanguageNormalizer(TargetLanguagesVocabulary.valueOf(targetVocabString));
+		Float minimumConfidence = Float.valueOf( event.getServletContext().getInitParameter("normalization.language.target.confidence"));
+		LanguageNormalizer languageNorm = new LanguageNormalizer(LanguagesVocabulary.valueOf(targetVocabString), minimumConfidence);
 
 		TrimAndEmptyValueCleaning spacesCleaner=new TrimAndEmptyValueCleaning();
 		DuplicateStatementCleaning dupStatementsCleaner=new DuplicateStatementCleaning();

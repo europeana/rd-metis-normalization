@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
+import eu.europeana.normalization.language.LanguagesVocabulary;
+
 /**
  * Data about a language in NAL. It is a subset of the data available in NAL, containing only the
  * data used for matching and normalizing.
@@ -130,5 +132,41 @@ public class NalLanguage {
                iso6392t + ", iso6393=" + iso6393 + ", originalNames=" + originalNames +
                ", alternativeNames=" + alternativeNames + ", labels=" + labels + "]";
     }
+
+	public String getNormalizedLanguageId(LanguagesVocabulary target) {
+        switch (target) {
+        case ISO_639_1:
+            return getIso6391();
+        case ISO_639_2b:
+            return getIso6392b();
+        case ISO_639_2t:
+            return getIso6392t();
+        case ISO_639_3:
+            return getIso6393();
+        case LANGUAGES_NAL:
+            return getIso6393();
+        default:
+            throw new RuntimeException("TODO");
+        }
+	}
+
+	public String getPrefLabel(String langCode) {
+		for(Label l: originalNames) {
+			if(StringUtils.equals(langCode, l.getLanguage())) {
+				return l.getLabel();
+			}
+		}
+		for(Label l: alternativeNames) {
+			if(StringUtils.equals(langCode, l.getLanguage())) {
+				return l.getLabel();
+			}
+		}
+		for(Label l: labels) {
+			if(StringUtils.equals(langCode, l.getLanguage())) {
+				return l.getLabel();
+			}
+		}
+		return originalNames.get(0).getLabel();
+	}
 
 }

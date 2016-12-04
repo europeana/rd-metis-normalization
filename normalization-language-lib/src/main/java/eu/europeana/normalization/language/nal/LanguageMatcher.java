@@ -8,8 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import eu.europeana.normalization.language.TargetLanguagesVocabulary;
+import eu.europeana.normalization.language.LanguagesVocabulary;
 import eu.europeana.normalization.util.MapOfLists;
 import eu.europeana.normalization.util.nlp.IndexUtilUnicode;
 
@@ -22,19 +24,21 @@ import eu.europeana.normalization.util.nlp.IndexUtilUnicode;
 public class LanguageMatcher {
     private static java.util.logging.Logger log               = java.util.logging.Logger.getLogger(LanguageMatcher.class.getName());
 
+    protected static final Pattern LOCALE_CODE_PATTERN=Pattern.compile("\\s*(\\p{Alpha}\\p{Alpha})-\\p{Alpha}\\p{Alpha}\\s*");
+    
     private Map<String, String>             isoCodes          = new HashMap<String, String>();
     private Map<String, String>             unambiguousLabels = new HashMap<String, String>();
     private MapOfLists<String, String>      ambiguousLabels   = new MapOfLists<String, String>();
 
     EuropeanLanguagesNal                    matchVocab;
-    TargetLanguagesVocabulary               target;
+    LanguagesVocabulary               target;
 
     /**
      * Creates a new instance of this class.
      * 
      * @param matchingVocab
      */
-    public LanguageMatcher(EuropeanLanguagesNal matchingVocab, TargetLanguagesVocabulary target) {
+    public LanguageMatcher(EuropeanLanguagesNal matchingVocab, LanguagesVocabulary target) {
         super();
         this.matchVocab = matchingVocab;
         this.target = target;
@@ -54,7 +58,7 @@ public class LanguageMatcher {
      * @param l
      */
     protected void index(NalLanguage l) {
-        String norm = getNormalizedLanguageId(l);
+        String norm = l.getNormalizedLanguageId(target);
         if(norm==null)
         	return;
 
@@ -96,26 +100,7 @@ public class LanguageMatcher {
         }
     }
 
-    /**
-     * @param l
-     * @return
-     */
-    private String getNormalizedLanguageId(NalLanguage l) {
-        switch (target) {
-        case ISO_639_1:
-            return l.getIso6391();
-        case ISO_639_2b:
-            return l.getIso6392b();
-        case ISO_639_2t:
-            return l.getIso6392t();
-        case ISO_639_3:
-            return l.getIso6393();
-        case LANGUAGES_NAL:
-            return l.getIso6393();
-        default:
-            throw new RuntimeException("TODO");
-        }
-    }
+
 
     public void printStats() {
         StringBuilder sb = new StringBuilder();
@@ -147,9 +132,17 @@ public class LanguageMatcher {
 // String valueNorm = normalizeLabel(value);
 // }
 
-    public String findIsoCodeMatch(String valueP) {
+    public String findIsoCodeMatch(String valueP, String nonNormalizedValue) {
         String value = valueP.trim();
-        if (value.length() > 3 || value.length() < 2) return null;
+        if (value.length() > 3 || value.length() < 2) {
+        	if(nonNormalizedValue!=null) {
+	        	Matcher matcher = LOCALE_CODE_PATTERN.matcher(value);
+				if (matcher.matches()) {
+	        		return isoCodes.get(matcher.group(1));
+	        	}
+        	} 
+    		return null;
+        }
         String valueNorm = value.toLowerCase();
         return isoCodes.get(valueNorm);
     }
@@ -162,6 +155,32 @@ public class LanguageMatcher {
         return IndexUtilUnicode.encode(label);
     }
 
+    public List<String> findLabelAllWordMatches(String lbl) {
+        String lblEnc = normalizeLabelForIndex(lbl);
+        String[] words = lblEnc.split("\\s+");
+
+        HashSet<String> foundMatches = new HashSet<String>(10);
+        for (int j = 0; j < words.length; j++) {
+            String wrd = words[j];
+            if (j == 0 || j == words.length - 1) {
+                String findIsoCodeMatch = findIsoCodeMatch(wrd, null);
+                if (findIsoCodeMatch != null) { 
+                	foundMatches.add(findIsoCodeMatch);
+                	continue;
+                }
+            }
+// if (wrd.length()>2)
+            List<String> labelMatches = findLabelMatches(wrd);
+            if (labelMatches.isEmpty()) 
+            	return Collections.emptyList();
+			foundMatches.addAll(labelMatches);
+        }
+
+        return new ArrayList<String>(foundMatches);
+    }
+    
+    
+    
     /**
      * @param lbl
      * @return
@@ -174,7 +193,7 @@ public class LanguageMatcher {
         for (int j = 0; j < words.length; j++) {
             String wrd = words[j];
             if (j == 0 || j == words.length - 1) {
-                String findIsoCodeMatch = findIsoCodeMatch(wrd);
+                String findIsoCodeMatch = findIsoCodeMatch(wrd, null);
                 if (findIsoCodeMatch != null) foundMatches.add(findIsoCodeMatch);
             }
 

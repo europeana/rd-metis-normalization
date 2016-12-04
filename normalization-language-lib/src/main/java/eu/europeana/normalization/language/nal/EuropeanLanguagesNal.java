@@ -8,12 +8,15 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import eu.europeana.normalization.language.LanguagesVocabulary;
 import eu.europeana.normalization.util.XmlUtil;
 
 /**
@@ -27,6 +30,8 @@ public class EuropeanLanguagesNal {
 
     List<NalLanguage>                       languages           = new ArrayList<NalLanguage>();
     List<NalLanguage>                       deprecatedLanguages = new ArrayList<NalLanguage>();
+    
+    Map<String, NalLanguage> normalizedIndex;
 
     /**
      * Creates a new instance of this class.
@@ -102,4 +107,19 @@ public class EuropeanLanguagesNal {
         return deprecatedLanguages;
     }
 
+	public synchronized void initNormalizedIndex(LanguagesVocabulary target) {
+		if(normalizedIndex==null) {
+			normalizedIndex=new Hashtable<>();
+			for(NalLanguage l: getLanguages()) {
+				String normalizedLanguageId = l.getNormalizedLanguageId(target);
+				if (normalizedLanguageId!=null)
+					normalizedIndex.put(normalizedLanguageId, l);
+			}
+		}
+	}
+
+    public NalLanguage lookupNormalizedLanguageId(String normalizedLanguageId) {
+    	 return normalizedIndex.get(normalizedLanguageId);
+    }
+    
 }

@@ -146,9 +146,8 @@ public class XmlUtil {
     }
 
     public static String getElementTextByTagName(Element n, String elementName) {
-        NodeList subNodes = n.getElementsByTagName(elementName);
-        int sz = subNodes.getLength();
-        if (sz > 0) return ((Element)subNodes.item(0)).getTextContent();
+        Element subEl = getElementByTagName(n, elementName);
+        if (subEl!=null) return getElementText(subEl);
         return null;
     }
 

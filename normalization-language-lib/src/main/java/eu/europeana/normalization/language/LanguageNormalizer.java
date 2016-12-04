@@ -1,16 +1,10 @@
 /* LanguageNormalizer.java - created on 16/03/2016, Copyright (c) 2011 The European Library, all rights reserved */
 package eu.europeana.normalization.language;
 
-import java.io.ObjectOutputStream.PutField;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.w3c.dom.Document;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import eu.europeana.normalization.NormalizeDetails;
 import eu.europeana.normalization.RecordNormalization;
@@ -27,9 +21,11 @@ import eu.europeana.normalization.normalizers.ValueToRecordNormalizationWrapper.
  * @since 16/03/2016
  */
 public class LanguageNormalizer implements ValueNormalization {
-    private static java.util.logging.Logger log = java.util.logging.Logger.getLogger(LanguageNormalizer.class.getName());
+    @SuppressWarnings("unused")
+	private static java.util.logging.Logger log = java.util.logging.Logger.getLogger(LanguageNormalizer.class.getName());
 
-    TargetLanguagesVocabulary               targetVocab;
+    LanguagesVocabulary               targetVocab;
+    Float               minimumConfidence;
     LanguageMatcher                         normalizer;
 
     /**
@@ -37,7 +33,7 @@ public class LanguageNormalizer implements ValueNormalization {
      * 
      * @param targetVocab
      */
-    public LanguageNormalizer(TargetLanguagesVocabulary targetVocab) {
+    public LanguageNormalizer(LanguagesVocabulary targetVocab, Float minimumConfidence) {
         super();
         this.targetVocab = targetVocab;
         normalizer = new LanguageMatcher(new EuropeanLanguagesNal(), targetVocab);
@@ -56,7 +52,7 @@ public class LanguageNormalizer implements ValueNormalization {
     public List<NormalizeDetails> normalizeDetailed(String lbl) {
         List<NormalizeDetails> res = new ArrayList<>();
 
-        String normalized = normalizer.findIsoCodeMatch(lbl);
+        String normalized = normalizer.findIsoCodeMatch(lbl, lbl);
         if (normalized != null && normalized.equalsIgnoreCase(lbl)) {
             res.add(new NormalizeDetails(normalized, 1));
         } else if (normalized != null) {
@@ -68,16 +64,30 @@ public class LanguageNormalizer implements ValueNormalization {
             } else {
 // if (!lbl.endsWith("[Metadata]") && !lbl.endsWith("[Resource]")) {// Some invalid values that were
 // present when research was underway. Ingestion will clean these values later
-                normalizeds = normalizer.findLabelWordMatches(lbl);
+                normalizeds = normalizer.findLabelAllWordMatches(lbl);
                 if (!normalizeds.isEmpty()) {
-                    res.addAll(NormalizeDetails.newList(normalizeds, 0.85f));
+                    res.addAll(NormalizeDetails.newList(normalizeds, 0.95f));
+                }else {
+	                normalizeds = normalizer.findLabelWordMatches(lbl);
+	                if (!normalizeds.isEmpty()) {
+	                	res.addAll(NormalizeDetails.newList(normalizeds, 0.85f));
+	                }
                 }
             }
         }
+        if(minimumConfidence!=null)
+	        for(int i=0 ; i<res.size() ; i++) {
+	        	NormalizeDetails n=res.get(i);
+	        	if(n.getConfidence() < minimumConfidence) {
+	        		res.remove(i);
+	        		i--;
+	        	}
+	        }
         return res;
     }
 
 	public RecordNormalization toEdmRecordNormalizer() {
+		@SuppressWarnings("serial")
 		XpathQuery dcLanguageQuery=new XpathQuery(
 				new HashMap<String, String>() {{
 					put("dc", "http://purl.org/dc/elements/1.1/");
